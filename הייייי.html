@@ -1,0 +1,713 @@
+<!-- עבדת הגשה בבניית אתרים סופיה לאה ויסוצקי 324789841, נוצר 23.06.2026 -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & GEO -->
+    <title>משחק ללימוד אותיות בערבית</title>
+    <meta name="description" content="אפליקציה אינטראקטיבית בעמוד אחד ללימוד הא-ב הערבי ותעתיק עברי. משחק שאלות ותשובות ללמידה פעילה.">
+    <meta name="keywords" content="ערבית, לימוד שפות, שאלון אמריקאי, משחק לימודי, תעתיק עברי">
+    <meta name="author" content="סופיה לאה ויסוצקי">
+    
+    <!-- חיבור לפונטים מגוגל פונטס-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- CSS והגדרות העיצוביות של אפליקציה-->
+    <style>
+    
+        /* משתני צבע עיקריים */
+        :root {
+            --primary-color: #e07a5f; /* טרקוטה / חרס */
+            --secondary-color: #c96a50;
+            --success-color: #81b29a; /* ירוק מרווה להצלחה */
+            --bg-color: #f4f1de; /* רקע בז'/שמנת */
+            --card-bg: #ffffff;
+            --text-dark: #3d405b; /* כחול כהה מעומעם לטקסט */
+            --text-light: #9ea0b0;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        /* איפוס בסיסי וטיפוגרפיה */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* עיצוב ההדר והניווט */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* עיצוב תוכן מרכזי */
+        main {
+            flex-grow: 1;
+            padding: 2rem 5%;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* מחלקה להסתרת אזורים ב-SPA */
+        .hidden {
+            display: none !important;
+        }
+
+        /* סגנון כללי לאזורים */
+        section {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            animation: fadeIn 0.5s ease-in-out;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        section h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        section p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* כפתורים */
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* עיצוב ייעודי למסך המשחק */
+        #question-display {
+            font-family: 'Amiri', serif;
+            font-size: 6rem;
+            color: var(--text-dark);
+            margin: 2rem 0;
+            background: var(--bg-color);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid #e9ecef;
+        }
+        
+        /* סידור ה-4 כפתורים ב-2 על 2 */
+        #answers-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 2rem;
+        }
+
+        menu.answers-grid button {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1.3rem;
+            background-color: white;
+            color: var(--text-dark);
+            border: 2px solid #e9ecef;
+            box-shadow: none;
+        }
+
+        menu.answers-grid button:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: #faedeb; /* רקע חרס בהיר במעבר עכבר */
+        }
+
+        menu.answers-grid button.correct {
+            background-color: #eaf1ed; /* רקע מרווה עדין לתשובה נכונה */
+            border-color: var(--success-color);
+            color: #2c4c3b;
+        }
+
+        menu.answers-grid button.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        /* עיצוב אלמנט <progress> החדש */
+        progress {
+            width: 100%;
+            height: 15px;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            appearance: none;
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: #e9ecef;
+            border-radius: 10px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--success-color);
+            border-radius: 10px;
+        }
+
+        /* עיצוב מודאל <dialog> החדש */
+        dialog {
+            margin: auto;
+            padding: 2.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        dialog::backdrop {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+        }
+
+        /* עיצוב אלמנט <details> החדש באזור האודות */
+        details {
+            background: var(--bg-color);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: right;
+            border: 1px solid #e9ecef;
+        }
+
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            list-style: none; /* הסרת חץ ברירת המחדל בחלק מהדפדפנים */
+            display: flex;
+            align-items: center;
+        }
+        
+        summary::before {
+            content: "➕";
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+        
+        details[open] summary::before {
+            content: "➖";
+        }
+
+        details p {
+            margin-top: 1rem;
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        /* מדיה וטפסים */
+        figure {
+            margin: 2rem 0;
+        }
+
+        figure img {
+            max-width: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+        }
+
+        figcaption {
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        iframe {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border: none;
+            border-radius: var(--border-radius);
+            margin-top: 1.5rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: right;
+            margin-top: 2rem;
+            background: var(--bg-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        fieldset {
+            border: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input, textarea {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        /* פוטר */
+        footer {
+            background-color: var(--text-dark);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        /* רספונסיביות */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            #question-display {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>א-ב בערבית</h1>
+        <nav aria-label="ניווט ראשי">
+            <ul>
+                <li><a href="#" onclick="showSection('splash'); return false;">ראשי</a></li>
+                <li><a href="#" onclick="showSection('instructions'); return false;">איך משחקים</a></li>
+                <li><a href="#" onclick="showSection('about'); return false;">אודות היוצרת והקוד</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="app-container">
+        <!-- מסך פתיחה -->
+        <section id="splash">
+            <h2>ברוכים הבאים לאלף-בא בערבית!</h2>
+            <p>אפליקציה שנועדה לעזור לכם ללמוד את הא-ב הערבי בצורה הכי טובה ואינטראקטיבית</p>
+            <p>המשחק מתאים למתחילים שרוצים ללמוד את התעתיק המדויק של כל אות.</p>
+            <br>
+            <button onclick="showSection('quiz'); startQuiz();">התחל לשחק כאן</button>
+            <br><br>
+            <button onclick="showSection('instructions');" style="background-color: var(--text-light);">הוראות המשחק</button>
+        </section>
+
+        <!-- מסך ההוראות -->
+        <section id="instructions" class="hidden">
+            <h2>איך משחקים?</h2>
+            <article style="text-align: right; margin-top: 2rem;">
+                <p>המשחק מציג בכל פעם אות אחת בערבית, ועליך לבחור את התעתיק הנכון לעברית מתוך 4 אפשרויות.</p>
+                <ul>
+                    <li>יש לענות על 10 שאלות כדי לסיים את המשחק.</li>
+                    <li>מד ההתקדמות למעלה יראה לך באיזו שאלה אתה נמצא.</li>
+                    <li>תשובה נכונה תסומן בירוק, ותשובה שגויה באדום.</li>
+                </ul>
+                <br>
+                <button onclick="showSection('quiz'); startQuiz();">הבנתי, בואו נשחק!</button>
+            </article>
+        </section>
+
+        <!-- מסך המשחק המרכזי -->
+        <section id="quiz" class="hidden">
+            <h2>מצא את התעתיק הנכון</h2>
+            
+            <!-- אלמנט חדש 1: <progress> -->
+            <progress id="quiz-progress" value="0" max="10" aria-label="התקדמות בשאלון"></progress>
+            
+            <article id="game-board">
+                <!-- כאן תוצג האות בערבית -->
+                <h3 id="question-display" aria-label="האות בערבית">أ</h3>
+                
+                <!-- רשימת התשובות (מקלדת סמנטית במקום קונטיינר גנרי) -->
+                <menu class="answers-grid" id="answers-container">
+                    <!-- הכפתורים יוזרקו לכאן על ידי JavaScript -->
+                </menu>
+            </article>
+        </section>
+
+        <!-- מסך אודות (כולל טופס, סרטון ואלמנט details) -->
+        <section id="about" class="hidden">
+            <h2></h2>
+            
+            <figure>
+                <!-- הוספת תמונת פרופיל או תמונת אווירה -->
+                <img src="profile.jpg" alt="סופיה לאה ויסוצקי">
+                <figcaption>אפליקציה זו פותחה ע"י סופיה לאה ויסוצקי</figcaption>
+            </figure>
+
+            <article style="text-align: right;">
+                <h3>קצת עלי ועל האפליקציה</h3>
+                <p>היי:) אני סופי, בת 24. כסטודנטית שנה א' במסלול הדו-חוגי ללימודי המזרח התיכון ומדעי המידע, מצאתי את עצמי מתמודדת עם האתגר של שינון אותיות הא-ב הערבי והתעתיק שלהן. אפליקציה זו פותחה כעבודת סיום בקורס לבניית אתרים במטרה לחבר בין שני תחומי העניין שאני לומדת ולעזור לסטודנטים אחרים בקושי שאני חוויתי.</p>
+                
+                <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ccc;">
+                
+                <h3>סרטון הסבר על הקוד</h3>
+                <!-- סרטון יוטיוב (Media) -->
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="הסבר על קוד האפליקציה" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                
+                <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ccc;">
+
+                <h3>שאלות ותשובות</h3>
+                
+                <!-- אלמנט חדש 2: <details> ו-<summary> -->
+                <details>
+                    <summary>באילו כלי בינה מלאכותית השתמשת?</summary>
+                    <p>לטובת בניית האפליקציה נעזרתי ב-Gemini שעזר לי בבניית בסיס הקוד ובעיצוב הממשק.</p>
+                </details>
+
+                <details>
+                    <summary>מה היו האתגרים המרכזיים בבנייה ללא div ו-span?</summary>
+                    <p>האתגר המרכזי היה קיבוץ אלמנטים (Grouping) לצורך עיצוב (Grid/Flexbox). פתרתי זאת על ידי שימוש בתגיות כמו article, section, menu, figure, ו-fieldset בצורה סמנטית נכונה.</p>
+                </details>
+
+                <details>
+                    <summary>איך האפליקציה הזו שונה מאתר סטטי?</summary>
+                    <p>באתר סטטי המשתמש רק צופה במידע. כאן, המשתמש מפעיל לוגיקה באמצעות JavaScript - לוחץ על תשובות, מקבל משוב מיידי כמו צלילים וצבעים מתעדכן בזמן אמת, ללא רענון הדף.</p>
+                </details>
+
+                <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ccc;">
+
+                <!-- טופס התקשרות (מומלץ במטלה) -->
+                <h3>טופס יצירת קשר משוב</h3>
+                <form action="#" onsubmit="alert('המשוב נשלח בהצלחה! (סימולציה)'); return false;">
+                    <fieldset>
+                        <label for="userName">שם:</label>
+                        <input type="text" id="userName" name="userName" required placeholder="הזן את שמך">
+                    </fieldset>
+                    <fieldset>
+                        <label for="feedback">הודעה:</label>
+                        <textarea id="feedback" name="feedback" rows="4" required placeholder="מה דעתך על המשחק?"></textarea>
+                    </fieldset>
+                    <button type="submit">שליחת משוב</button>
+                </form>
+            </article>
+        </section>
+    </main>
+
+    <!-- אלמנט חדש 3: <dialog> -->
+    <dialog id="result-dialog">
+        <h2 id="result-title">המשחק הסתיים!</h2>
+        <p>הציון שלך:</p>
+        <h3 id="result-score" style="font-size: 3rem; color: var(--primary-color); margin: 1rem 0;">10/10</h3>
+        <p id="result-message">כל הכבוד! אתה שולט באלף-בא.</p>
+        <br>
+        <menu style="padding: 0; margin: 0; list-style: none;">
+            <button onclick="closeDialogAndRestart()">שחק שוב</button>
+            <button onclick="document.getElementById('result-dialog').close(); showSection('splash');" style="background-color: var(--text-light); margin-top: 10px;">חזור לראשי</button>
+        </menu>
+    </dialog>
+
+    <!-- קבצי אודיו (Media) לשימוש ב-JavaScript -->
+    <audio id="success-audio" src="great-success-borat.mp3" preload="auto"></audio>
+    <!-- הוספת קובץ האודיו לתשובה שגויה -->
+    <audio id="error-audio" src="https://assets.mixkit.co/active_storage/sfx/3148/3148-preview.mp3" preload="auto"></audio>
+    <!-- מוזיקת רקע למשחק -->
+    <audio id="bg-music" src="background-music.mp3" loop preload="auto"></audio>
+
+    <footer>
+        <p>פותח ע"י סופיה לאה ויסוצקי במסגרת קורס בניית אתרים</p>
+    </footer>
+
+    <script>
+        // ==========================================
+        // משתנים כלליים (State)
+        // ==========================================
+        
+        // מאגר השאלות: האותיות בערבית והתעתיק שלהן
+        const alphabetData = [
+            { arabic: 'أ', hebrew: 'א (אלף)' },
+            { arabic: 'ب', hebrew: 'ב (בא)' },
+            { arabic: 'ت', hebrew: 'ת (תא)' },
+            { arabic: 'ث', hebrew: "ת' (ת'א)" },
+            { arabic: 'ج', hebrew: "ג' (ג'ים)" },
+            { arabic: 'ح', hebrew: 'ח (חא)' },
+            { arabic: 'خ', hebrew: "ח' (ח'א)" },
+            { arabic: 'د', hebrew: 'ד (דאל)' },
+            { arabic: 'ذ', hebrew: "ד' (ד'אל)" },
+            { arabic: 'ر', hebrew: 'ר (רא)' },
+            { arabic: 'ز', hebrew: 'ז (זאי)' },
+            { arabic: 'س', hebrew: 'ס (סין)' },
+            { arabic: 'ش', hebrew: 'ש (שין)' },
+            { arabic: 'ص', hebrew: 'צ (צאד)' },
+            { arabic: 'ض', hebrew: 'צ\' (צ\'אד)' },
+            { arabic: 'ط', hebrew: 'ט (טא)' },
+            { arabic: 'ع', hebrew: 'ע (עין)' },
+            { arabic: 'غ', hebrew: "ע' (ע'ין)" },
+            { arabic: 'ف', hebrew: 'פ (פא)' },
+            { arabic: 'ق', hebrew: 'ק (קאף)' },
+            { arabic: 'ك', hebrew: 'כ (כאף)' },
+            { arabic: 'ل', hebrew: 'ל (לאם)' },
+            { arabic: 'م', hebrew: 'מ (מים)' },
+            { arabic: 'ن', hebrew: 'נ (נון)' },
+            { arabic: 'ه', hebrew: 'ה (הא)' },
+            { arabic: 'و', hebrew: 'ו (ואו)' },
+            { arabic: 'ي', hebrew: 'י (יא)' }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const totalQuestionsPerGame = 10;
+
+        // ==========================================
+        // בחירת אלמנטים מה-DOM
+        // ==========================================
+        const questionDisplay = document.getElementById('question-display');
+        const answersContainer = document.getElementById('answers-container');
+        const progressBar = document.getElementById('quiz-progress');
+        const resultDialog = document.getElementById('result-dialog');
+        const successAudio = document.getElementById('success-audio');
+        const errorAudio = document.getElementById('error-audio'); // בחירת צליל השגיאה
+        const bgMusic = document.getElementById('bg-music'); // בחירת מוזיקת הרקע
+
+        // ==========================================
+        // פונקציות תצוגה וניווט ב-SPA
+        // ==========================================
+        
+        // פונקציה המסתירה את כל ה-sections ומציגה רק את המבוקש
+        function showSection(sectionId) {
+            // אם יוצאים ממסך המשחק, נעצור את מוזיקת הרקע
+            if (sectionId !== 'quiz' && typeof bgMusic !== 'undefined') {
+                bgMusic.pause();
+            }
+
+            // בחירת כל ה-sections בתוך ה-main
+            const sections = document.querySelectorAll('main section');
+            
+            // לולאה שעוברת על כולם ומסתירה אותם
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // הצגת ה-section הספציפי שהועבר לפונקציה
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        // ==========================================
+        // לוגיקה של המשחק
+        // ==========================================
+
+        // הפעלת משחק חדש
+        function startQuiz() {
+            score = 0;
+            currentQuestionIndex = 0;
+            
+            // הפעלת מוזיקת הרקע בעוצמה רגילה (40%)
+            bgMusic.volume = 0.4; 
+            bgMusic.currentTime = 0;
+            bgMusic.play().catch(e => console.log("Audio play prevented by browser policy"));
+            
+            // ערבוב מערך האותיות המקורי כדי לקבל שאלות אקראיות
+            const shuffledData = [...alphabetData].sort(() => 0.5 - Math.random());
+            
+            // חיתוך המערך המעורבב למספר השאלות הדרוש למשחק אחד (10)
+            currentQuestions = shuffledData.slice(0, totalQuestionsPerGame);
+            
+            // עדכון מד ההתקדמות ההתחלתי
+            progressBar.max = totalQuestionsPerGame;
+            progressBar.value = 0;
+            
+            // טעינת השאלה הראשונה
+            loadQuestion();
+        }
+
+        // טעינת שאלה בודדת למסך
+        function loadQuestion() {
+            // ניקוי כפתורי התשובות הישנים
+            answersContainer.innerHTML = '';
+            
+            // שליפת השאלה הנוכחית
+            const currentItem = currentQuestions[currentQuestionIndex];
+            
+            // הצגת האות בערבית במסך
+            questionDisplay.textContent = currentItem.arabic;
+            
+            // יצירת מערך תשובות אפשריות (התשובה הנכונה + 3 שגויות)
+            let answerOptions = [currentItem.hebrew];
+            
+            // לולאה לבחירת 3 מסיחים (תשובות שגויות אקראיות) מתוך כלל המאגר
+            while(answerOptions.length < 4) {
+                const randomItem = alphabetData[Math.floor(Math.random() * alphabetData.length)];
+                // ווידוא שלא מכניסים את התשובה הנכונה שוב, או מסיח שכבר קיים
+                if(!answerOptions.includes(randomItem.hebrew)) {
+                    answerOptions.push(randomItem.hebrew);
+                }
+            }
+            
+            // ערבוב סדר התשובות כדי שהתשובה הנכונה לא תהיה תמיד במקום הראשון
+            answerOptions.sort(() => 0.5 - Math.random());
+            
+            // יצירת כפתורי התשובות והזרקתם ל-HTML
+            answerOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                // הוספת אירוע לחיצה לכל כפתור המפעיל את פונקציית בדיקת התשובה
+                button.onclick = () => checkAnswer(button, option, currentItem.hebrew);
+                answersContainer.appendChild(button);
+            });
+
+            // עדכון מד ההתקדמות (Progress Bar - אלמנט ה-HTML החדש)
+            progressBar.value = currentQuestionIndex;
+        }
+
+        // בדיקת התשובה שנבחרה
+        function checkAnswer(clickedButton, selectedAnswer, correctAnswer) {
+            // השבתת כל הכפתורים כדי למנוע לחיצות נוספות בזמן שמציגים משוב
+            const allButtons = answersContainer.querySelectorAll('button');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            // החלשת מוזיקת הרקע בעת בחירת תשובה לאחוז נמוך
+            bgMusic.volume = 0.1;
+
+            if (selectedAnswer === correctAnswer) {
+                // תשובה נכונה: הוספת מחלקה ירוקה, העלאת ניקוד וניגון צליל הצלחה
+                clickedButton.classList.add('correct');
+                score++;
+                
+                // ניגון אודיו הצלחה
+                successAudio.currentTime = 0;
+                successAudio.play().catch(e => console.log("Audio play prevented by browser policy"));
+            } else {
+                // תשובה שגויה: הוספת מחלקה אדומה לכפתור שנלחץ
+                clickedButton.classList.add('wrong');
+                
+                // ניגון אודיו שגיאה
+                errorAudio.currentTime = 0;
+                errorAudio.play().catch(e => console.log("Audio play prevented by browser policy"));
+
+                // מציאת הכפתור של התשובה הנכונה וצביעתו בירוק כדי ללמד את המשתמש
+                allButtons.forEach(btn => {
+                    if(btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            
+            // החזרת עוצמת המוזיקה לרגילה לאחר 2 שניות (2000 מילישניות)
+            setTimeout(() => {
+                bgMusic.volume = 0.2;
+            }, 2000);
+
+            // המתנה של שנייה וחצי ואז מעבר לשאלה הבאה
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < totalQuestionsPerGame) {
+                    loadQuestion();
+                } else {
+                    endQuiz();
+                }
+            }, 1500);
+        }
+
+        // ==========================================
+        // אירועי סיום משחק וחלונות קופצים
+        // ==========================================
+
+        // סיום המשחק והצגת התוצאות
+        function endQuiz() {
+            // עצירת מוזיקת הרקע בסיום המשחק
+            bgMusic.pause();
+            
+            // עדכון המד למקסימום
+            progressBar.value = totalQuestionsPerGame;
+            
+            // עדכון טקסטים במודאל
+            document.getElementById('result-score').textContent = `${score} / ${totalQuestionsPerGame}`;
+            
+            let message = "";
+            if(score === totalQuestionsPerGame) message = "מושלם! אתה שולט בא-ב הערבי לחלוטין!";
+            else if(score >= 7) message = "כל הכבוד! תוצאה מצוינת.";
+            else message = "התחלה טובה. כדאי לחזור על ההוראות ולנסות שוב.";
+            
+            document.getElementById('result-message').textContent = message;
+            
+            // הפעלת אלמנט ה-<dialog> המובנה ב-HTML
+            resultDialog.showModal();
+        }
+
+        // סגירת המודאל והתחלה מחדש
+        function closeDialogAndRestart() {
+            resultDialog.close();
+            startQuiz();
+        }
+
+    </script>
+</body>
+</html>
